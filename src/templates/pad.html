@@ -47,6 +47,12 @@
         <% e.end_block(); %>
 
         <style title="dynamicsyntax"></style>
+
+        <% if (req.query.showChat == "false") { %>
+        <style type="text/css">
+          #chaticon { display: none }
+        </style>
+        <% } %>
         <% e.end_block(); %>
 
         <link rel="localizations" type="application/l10n+json" href="../locales.json" />

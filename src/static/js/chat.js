@@ -186,7 +186,7 @@ var chat = (function()
           count++;
           $("#chatcounter").text(count);
 
-          if(!chatOpen) {
+          if(!chatOpen && $("#chaticon").css("display") != "none") {
             $.gritter.add({
               // (string | mandatory) the heading of the notification
               title: ctx.authorName,
