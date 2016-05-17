@@ -48,6 +48,9 @@ var remoteAddress = require("../utils/RemoteAddress").remoteAddress;
  *   readonly = Wether the client has only read access (true) or read/write access (false)
  *   rev = That last revision that was send to this client
  *   author = the author name of this session
+ *   pending = a map that stores true for revisions that are currently pending
+ *             from this session, allowing them to be distinguished from other
+ *             revisions from the same author in another session
  */
 var sessioninfos = {};
 exports.sessioninfos = sessioninfos;
@@ -792,6 +795,10 @@ function handleUserChanges(data, cb)
         stats.meter('failedChangesets').mark();
         return callback(e)
       }
+      if (!('pending' in thisSession)) {
+        thisSession.pending = {};
+      }
+      thisSession.pending[pad.head] = true;
 
       var correctionChangeset = _correctMarkersInPad(pad.atext, pad.pool);
       if (correctionChangeset) {
@@ -869,9 +876,11 @@ exports.updatePadClients = function(pad, callback)
             if(sessioninfos[sid] == null)
               return callback(null);
 
-            if(author == sessioninfos[sid].author)
+            if(author == sessioninfos[sid].author && sessioninfos[sid].pending
+               && sessioninfos[sid].pending[r])
             {
               client.json.send({"type":"COLLABROOM","data":{type:"ACCEPT_COMMIT", newRev:r}});
+              delete sessioninfos[sid].pending[r];
             }
             else
             {
